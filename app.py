@@ -1,15 +1,32 @@
 import os
 import logging
+import threading
 from urllib.parse import urlparse
 import requests
+from flask import Flask, jsonify
 from telegram import Update
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, CallbackContext
 from telegram.request import HTTPXRequest
 
-# -------------------- НАСТРОЙКИ --------------------
+# -------------------- FLASK ДЛЯ RENDER --------------------
+web_app = Flask(__name__)
+
+@web_app.route('/')
+def home():
+    return jsonify({"status": "ok", "service": "Video Downloader Bot", "author": "Kolyadual"})
+
+@web_app.route('/health')
+def health():
+    return jsonify({"ok": True})
+
+def run_flask():
+    port = int(os.environ.get("PORT", 5000))
+    web_app.run(host="0.0.0.0", port=port)
+
+# -------------------- НАСТРОЙКИ БОТА --------------------
 TOKEN = os.environ.get("TELEGRAM_TOKEN", "8348485770:AAEQafsu09GUUU09qMwXoNVsFUksbyzs6i0")
 API_URL = os.environ.get("API_URL", "https://youtube-download-api-render.onrender.com")
-ADMIN_ID = int(os.environ.get("ADMIN_ID", "7052350977"))
+ADMIN_ID = int(os.environ.get("ADMIN_ID", "123456789"))
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -142,8 +159,7 @@ async def handle_message(update: Update, context: CallbackContext) -> None:
     except Exception as e:
         await status_msg.edit_text(f"❌ Ошибка: {str(e)[:100]}")
 
-def main():
-    # Используем свой request с увеличенными таймаутами
+def run_bot():
     request = HTTPXRequest(connect_timeout=30, read_timeout=60, write_timeout=30)
     app = Application.builder().token(TOKEN).request(request).build()
     
@@ -155,4 +171,6 @@ def main():
     app.run_polling(drop_pending_updates=True)
 
 if __name__ == "__main__":
-    main()
+    # Запускаем Flask и бота параллельно
+    threading.Thread(target=run_flask, daemon=True).start()
+    run_bot()
