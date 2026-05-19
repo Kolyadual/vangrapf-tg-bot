@@ -8,7 +8,7 @@ from telegram.request import HTTPXRequest
 
 TOKEN = os.environ.get("TELEGRAM_TOKEN", "8348485770:AAEQafsu09GUUU09qMwXoNVsFUksbyzs6i0")
 API_URL = os.environ.get("API_URL", "https://youtube-download-api-render.onrender.com")
-ADMIN_ID = int(os.environ.get("ADMIN_ID", "123456789"))
+ADMIN_ID = int(os.environ.get("ADMIN_ID", "7052350977"))
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 logger = logging.getLogger(__name__)
